@@ -11,10 +11,40 @@ body {
   color: #212121;
   line-height: 1.5;
 }
-
+.gallery{
+  display: flex;
+  flex-wrap: wrap;
+  gap:20px;
+  justify-content: center;
+}
+.photo-card img{
+  display:block;
+  width: 350px;
+  height: 200px;
+}
+.info{
+  display:flex;
+  gap:10px;
+  font-size: 12px;
+}
+.hidden{
+  display: none;
+}
 #search-form {
+  display: flex;
+  justify-content:center;
+  gap: 20px;
+  border-radius: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: teal;
   font: inherit;
   padding: 8px;
-  max-width: 320px;
   margin-bottom: 16px;
+}
+#search-form button{
+  border-radius: 50px;
+}
+#search-form input{
+  border-radius: 50px;
 }
