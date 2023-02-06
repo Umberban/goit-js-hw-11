@@ -1,6 +1,6 @@
 import './css/styles.css';
 import Notiflix from 'notiflix';
-import { Request } from './api';
+import { request } from './api';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 
@@ -8,7 +8,7 @@ let page = 1;
 const imageContainerEl = document.querySelector(".gallery");
 const searchFormEl = document.getElementById('search-form');
 const loadMoreBtnEl = document.querySelector('.load-more')
-
+// making a mark-up for photo card
 function markUp(data){
      const markUpArr = data
      .map((el=>{return `<div class="photo-card"><a href="${el.largeImageURL}">
@@ -31,13 +31,18 @@ function markUp(data){
   .join("");
   imageContainerEl.insertAdjacentHTML('beforeend',markUpArr);
 }
-
+// add a lightbox lib to gallery
+let gallery = new SimpleLightbox('.gallery a');
+// creating a function for searching form
 async function searchHandler(event){
     event.preventDefault();
     page = 1;
-    const requestData = event.currentTarget.elements.searchQuery.value;
+    const requestData = event.target.searchQuery.value.trim();
+    if(requestData===""){
+        return;
+    }
     try{
-        const {data} = await Request(requestData,page);
+        const {data} = await request(requestData,page);
         if(data.hits.length){
             loadMoreBtnEl.classList.remove('hidden');
             Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
@@ -47,64 +52,34 @@ async function searchHandler(event){
         }
         imageContainerEl.innerHTML = '';
         markUp(data.hits);
-        let gallery = new SimpleLightbox('.gallery a');
+        gallery.refresh();
     
     }catch(err){
-        console.log(err)
+        Notiflix.Notify.failure(`Some ${err} broken all staff`)
     }
 }
 searchFormEl.addEventListener('submit',searchHandler);
-
-// async function loadMoreHandler(event){
-//     event.preventDefault();
-//     page++;
-//     const requestData = searchFormEl.elements.searchQuery.value;
-//     // let gallery = new SimpleLightbox('.photo-card a');
-//     try{
-//         const {data} = await Request(requestData,page);
-//         console.log(data);
-//         if(page===Math.floor(data.totalHits / 40)){
-//         loadMoreBtnEl.classList.add('hidden');
-//         Notiflix.Notify.warning("We're sorry, but you've reached the end of search results.");
-//         }
-//         markUp(data.hits);
-//         let gallery = new SimpleLightbox('.gallery a');
-//     }catch(err){
-//         console.log(err)
-//     }
-//     const { height: cardHeight } = document
-//         .querySelector(".gallery")
-//         .firstElementChild.getBoundingClientRect();
-
-//     window.scrollBy({
-//         top: cardHeight * 2,
-//         behavior: "smooth",
-// });
-// }
-// loadMoreBtnEl.addEventListener('click',loadMoreHandler);
-
+// add a function for infite scroll load
 async function loadMoreHandler(event){
     const {
         scrollTop,
         scrollHeight,
         clientHeight
     } = document.documentElement;
-    // event.preventDefault();
     page++;
-    const requestData = searchFormEl.elements.searchQuery.value;
-    // let gallery = new SimpleLightbox('.photo-card a');
+    const requestData = searchFormEl.searchQuery.value;
     try{
         if (scrollTop + clientHeight >= scrollHeight - 5){
-        const {data} = await Request(requestData,page);
+        const {data} = await request(requestData,page);
         console.log(data);
         if(page===Math.floor(data.totalHits / 40)){
         loadMoreBtnEl.classList.add('hidden');
         Notiflix.Notify.warning("We're sorry, but you've reached the end of search results.");
         }
         markUp(data.hits);
-        let gallery = new SimpleLightbox('.gallery a');}
+        gallery.refresh();}
     }catch(err){
-        console.log(err)
+        Notiflix.Notify.failure(`Some ${err} broken all staff`)
     }
     const { height: cardHeight } = document
         .querySelector(".gallery")
@@ -115,6 +90,7 @@ async function loadMoreHandler(event){
         behavior: "smooth",
 });
 }
+// add the listener for event scroll
 window.addEventListener('scroll',() => {
     const {
         scrollTop,
